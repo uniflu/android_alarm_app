@@ -23,7 +23,7 @@ void main() {
 
 DateTime scheduleTime = DateTime.now();
 
-Future<void> displayTime() async {
+Future<void> shakeAlarm() async {
   // アラームを鳴らす
   FlutterRingtonePlayer.playAlarm();
 
@@ -82,14 +82,23 @@ class MyApp extends StatelessWidget {
             ElevatedButton(
               onPressed: () async{
                 await AndroidAlarmManager.oneShotAt(
+                  // DateTime.now().add(Duration(seconds: 2)),
                   scheduleTime,
                   0,
-                  displayTime,
+                  shakeAlarm,
                   exact: true,
                   allowWhileIdle: true,
                 );
               },
               child: const Text('Set Alarm'),
+            ),
+
+            // アラームをキャンセル
+            ElevatedButton(
+              onPressed: () async{
+                await AndroidAlarmManager.cancel(0);
+              },
+              child: const Text('Cancel'),
             ),
           ],
         ),
