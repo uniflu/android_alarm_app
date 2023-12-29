@@ -88,6 +88,7 @@ class MyApp extends StatelessWidget {
                   shakeAlarm,
                   exact: true,
                   allowWhileIdle: true,
+                  wakeup: true,
                 );
               },
               child: const Text('Set Alarm'),
