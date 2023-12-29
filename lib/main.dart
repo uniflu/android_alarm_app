@@ -82,8 +82,7 @@ class MyApp extends StatelessWidget {
             ElevatedButton(
               onPressed: () async{
                 await AndroidAlarmManager.oneShotAt(
-                  DateTime.now().add(Duration(seconds: 2)),//Duration(seconds: 5),
-                  //scheduleTime,
+                  scheduleTime,
                   0,
                   displayTime,
                   exact: true,
