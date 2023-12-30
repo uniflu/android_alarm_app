@@ -27,29 +27,20 @@ Future<void> shakeAlarm() async {
   // アラームを鳴らす
   FlutterRingtonePlayer.playAlarm();
 
-  // 5回振ったことを検知
-  Completer<void> completer = Completer<void>();
+  // 指定回数振ったら止める
+  ShakeDetector.autoStart(
 
-  int shakeCount = 0;
+    // 5回振ってから、onPhoneShakeを呼び出す
+    minimumShakeCount: 5,
 
-  ShakeDetector detector = ShakeDetector.waitForStart(
+    // 検知の強さの最低値を少し小さくする
+    shakeThresholdGravity: 2,
+
+    // 5回振った後にアラームを止める
     onPhoneShake: () {
-      shakeCount++;
-      print('振動検知: $shakeCount 回');
-      if (shakeCount == 5) {
-        completer.complete();
-      }
+      FlutterRingtonePlayer.stop();
     },
   );
-
-  detector.startListening();
-
-  await completer.future;
-
-  // 5回振られた後の処理をここに追加
-  FlutterRingtonePlayer.stop();
-
-  detector.stopListening();
 }
 
 class MyApp extends StatelessWidget {
