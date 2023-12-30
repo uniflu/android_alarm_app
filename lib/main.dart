@@ -4,10 +4,12 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:shake/shake.dart';
 import 'dart:async';
+import 'notificationController.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   AndroidAlarmManager.initialize(); //初期化
+  NotificationController().initNotification();
 
   final app = MaterialApp(
       title: 'Flutter Demo',
@@ -72,6 +74,10 @@ class MyApp extends StatelessWidget {
 
             ElevatedButton(
               onPressed: () async{
+                // アラーム時刻を通知として表示
+                NotificationController().showNotification(scheduleTime.toString());
+
+                // アラームをセット
                 await AndroidAlarmManager.oneShotAt(
                   // DateTime.now().add(Duration(seconds: 2)),
                   scheduleTime,
