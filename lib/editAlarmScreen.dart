@@ -2,25 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:shake/shake.dart';
-import 'dart:async';
 import 'notificationController.dart';
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  AndroidAlarmManager.initialize(); //初期化
-  NotificationController().initNotification();
-
-  final app = MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyApp(),
-  );
-  
-  runApp(app);
-}
+import 'package:shared_preferences/shared_preferences.dart';
 
 DateTime scheduleTime = DateTime.now();
 
@@ -44,11 +27,12 @@ Future<void> shakeAlarm() async {
   );
 }
 
-TimeOfDay? selectedTime = TimeOfDay.now();
+TimeOfDay? selectedTime;
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class EditAlarmScreen extends StatelessWidget {
+  const EditAlarmScreen({super.key});
 
+  // selectedTime(TimeOfDay)⇒アラーム時刻(DateTime)に変換
   DateTime createNextDateTimeFromTime(TimeOfDay selectedTime) {
 
     // 現在の時刻と比較対象の時刻をDateTime型に変換
@@ -107,14 +91,16 @@ class MyApp extends StatelessWidget {
                 // アラーム時刻を通知として表示
                 NotificationController().showNotification(selectedTime!.toString());
 
+                // アラームを保存
+                final _prefs = await SharedPreferences.getInstance();
+                int minuteTime = selectedTime!.hour * 60 + selectedTime!.minute;
+                _prefs.setBool(minuteTime.toString(), true);
+
                 // アラームをセット
                 await AndroidAlarmManager.oneShotAt(
-                  // DateTime.now().add(Duration(seconds: 2)),
                   selectedDateTime,
                   0,
                   shakeAlarm,
-                  // exact: true,
-                  // allowWhileIdle: true,
                   alarmClock: true,
                   wakeup: true,
                   rescheduleOnReboot: true,
