@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:shake/shake.dart';
@@ -45,8 +44,28 @@ Future<void> shakeAlarm() async {
   );
 }
 
+TimeOfDay? selectedTime = TimeOfDay.now();
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  DateTime createNextDateTimeFromTime(TimeOfDay selectedTime) {
+
+    // 現在の時刻と比較対象の時刻をDateTime型に変換
+    final DateTime now = DateTime.now();
+    DateTime selectedDateTime = now.copyWith(
+      hour: selectedTime.hour,
+      minute: selectedTime.minute,
+      second: 0
+    );
+
+    // selectedDateTimeが既に過ぎている場合は明日に設定
+    if (selectedDateTime.isBefore(now)) {
+      selectedDateTime = selectedDateTime.add(const Duration(days: 1));
+    } 
+    
+    return selectedDateTime;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,34 +80,48 @@ class MyApp extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
-              onPressed: (){
-                DatePicker.showDateTimePicker(
-                  context,
-                  showTitleActions: true,
-                  onChanged: (date) => scheduleTime = date,
-                  onConfirm: (date) {},
+              onPressed: () async{
+                final TimeOfDay? pickedTime = await showTimePicker(
+                  context: context, 
+                  initialTime: const TimeOfDay(hour: 0, minute: 0),                  
                 );
+
+                // 時刻を選択したかどうかで処理を分岐
+                if(pickedTime != null){
+                  print('selectedTime =  ${selectedTime}');
+                  selectedTime = pickedTime;
+                }
+                else{
+                  print('selectedTime = null');
+                }
               },
               child: const Text('Select Schedule Time'),
             ),
 
             ElevatedButton(
-              onPressed: () async{
+              onPressed: (selectedTime == null) ? null :  () async{
+
+                // スケジュール時刻
+                final DateTime selectedDateTime = createNextDateTimeFromTime(selectedTime!);
+
                 // アラーム時刻を通知として表示
-                NotificationController().showNotification(scheduleTime.toString());
+                NotificationController().showNotification(selectedTime!.toString());
 
                 // アラームをセット
                 await AndroidAlarmManager.oneShotAt(
                   // DateTime.now().add(Duration(seconds: 2)),
-                  scheduleTime,
+                  selectedDateTime,
                   0,
                   shakeAlarm,
-                  exact: true,
-                  allowWhileIdle: true,
+                  // exact: true,
+                  // allowWhileIdle: true,
+                  alarmClock: true,
                   wakeup: true,
+                  rescheduleOnReboot: true,
                 );
               },
               child: const Text('Set Alarm'),
+              
             ),
 
             // アラームをキャンセル
