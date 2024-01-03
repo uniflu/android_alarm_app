@@ -36,6 +36,9 @@ class AlarmDatasNotifier extends _$AlarmDatasNotifier {
       TimeOfDay timeOfDay = TimeOfDayConverter.toTimeOfDay(minuteTime);
       alarmDatas[timeOfDay] = prefs.getBool(key) ?? false;
     }
+
+    // stateを更新
+    state = alarmDatas;
   }
 
   // 上書き

@@ -5,9 +5,10 @@ import 'notification_controller.dart';
 import 'alarm_datas.dart';
 import 'edit_alarm_screen.dart';
 import 'time_of_day_converter.dart';
+import 'shake_alarm.dart';
 
 void main() async {
-  
+
   // 初期設定
   WidgetsFlutterBinding.ensureInitialized();
   AndroidAlarmManager.initialize(); //初期化
@@ -82,8 +83,12 @@ class MainScreen extends ConsumerWidget {
                     IconButton(
                       icon: const Icon(Icons.remove),
                       onPressed: () {
+                        // セーブデータから消す
                         final notifier = ref.read(alarmDatasNotifierProvider.notifier);
                         notifier.remove(entry.key); 
+
+                        // アラームをキャンセル
+                        ShakeAlarm.cancelAlarm(entry.key);
                       },
                       iconSize: 48,
                       color: Colors.red,
@@ -101,8 +106,20 @@ class MainScreen extends ConsumerWidget {
                     Switch(
                       value: entry.value,
                       onChanged: (value) {
+
+                        // セーブデータを変更
                         final notifier = ref.read(alarmDatasNotifierProvider.notifier);
-                        notifier.update(entry.key, !entry.value); 
+                        notifier.update(entry.key, value); 
+
+                        // オンにする場合はアラームをセット
+                        if(value){
+                          ShakeAlarm.setAlarm(entry.key);
+                        }
+
+                        // オフにする場合はアラームをキャンセル
+                        else{
+                          ShakeAlarm.cancelAlarm(entry.key);
+                        }
                       },
                     ),
                   ],
