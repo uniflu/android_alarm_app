@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'alarmDatas.dart';
+part of 'alarm_datas.dart';
 
 // **************************************************************************
 // RiverpodGenerator

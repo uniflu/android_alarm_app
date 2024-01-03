@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:collection';
-part 'alarmDatas.g.dart';
+part 'alarm_datas.g.dart';
 
 @riverpod
 class AlarmDatasNotifier extends _$AlarmDatasNotifier {
