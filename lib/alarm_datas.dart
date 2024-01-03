@@ -2,46 +2,23 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:collection';
+import 'time_of_day_converter.dart';
 part 'alarm_datas.g.dart';
 
 @riverpod
 class AlarmDatasNotifier extends _$AlarmDatasNotifier {
 
-  // final SharedPreferences prefs = SharedPreferences.getInstance().then((v) => _prefs = v);
-  // late final SharedPreferences _prefs;// = SharedPreferences.getInstance();
-  // late final _prefsFuture = SharedPreferences.getInstance().then((v) => _prefs = v);
+  // SplayTreeMap<TimeOfDay, bool>を作成
+  SplayTreeMap<TimeOfDay, bool> _createSplayTreeMap(){
+    return SplayTreeMap<TimeOfDay, bool>(
+      (a, b) => TimeOfDayConverter.toMinutes(a) -TimeOfDayConverter.toMinutes(b)
+    );
+  }
 
   @override
   SplayTreeMap<TimeOfDay, bool> build() {
-
-    // SharedPreferencesのインスタンスを取得
-    // SharedPreferences.getInstance().then((v) {
-    //   _prefs = v;
-    // });
-    // // _prefs = await SharedPreferences.getInstance(); 
-    
-    // // 返り値
-    // Map<TimeOfDay, bool> alarmDatas = Map<TimeOfDay, bool>();
-
-    // // セーブしていたデータを読み込み
-    // Set<String> keys = _prefs.getKeys();
-    // for (String key in keys) {
-    //   int minuteTime = int.parse(key); 
-    //   TimeOfDay timeOfDay = TimeOfDay(hour: minuteTime ~/ 60, minute: minuteTime % 60);
-    //   alarmDatas[timeOfDay] = _prefs.getBool(key) ?? false;
-    // }
-    
-    return SplayTreeMap<TimeOfDay, bool>(
-      (a, b) {
-        final aMinutes = a.hour * 60 + a.minute;
-        final bMinutes = b.hour * 60 + b.minute;
-        return aMinutes.compareTo(bMinutes);
-      }
-    ); //Map<TimeOfDay, bool>();
+    return _createSplayTreeMap();
   }
-
-
-
 
   // セット
   void loadSaveData() async {
@@ -50,19 +27,13 @@ class AlarmDatasNotifier extends _$AlarmDatasNotifier {
     final prefs = await SharedPreferences.getInstance();
 
     // 返り値
-    SplayTreeMap<TimeOfDay, bool> alarmDatas = SplayTreeMap<TimeOfDay, bool>(
-      (a, b) {
-        final aMinutes = a.hour * 60 + a.minute;
-        final bMinutes = b.hour * 60 + b.minute;
-        return aMinutes.compareTo(bMinutes);
-      }
-    ); //Map<TimeOfDay, bool>();
+    SplayTreeMap<TimeOfDay, bool> alarmDatas = _createSplayTreeMap();
 
     // セーブしていたデータを読み込み
     Set<String> keys = prefs.getKeys();
     for (String key in keys) {
       int minuteTime = int.parse(key); 
-      TimeOfDay timeOfDay = TimeOfDay(hour: minuteTime ~/ 60, minute: minuteTime % 60);
+      TimeOfDay timeOfDay = TimeOfDayConverter.toTimeOfDay(minuteTime);
       alarmDatas[timeOfDay] = prefs.getBool(key) ?? false;
     }
   }
@@ -73,18 +44,13 @@ class AlarmDatasNotifier extends _$AlarmDatasNotifier {
     // SharedPreferencesのインスタンス
     final prefs = await SharedPreferences.getInstance(); 
 
-    // 更新
-    // コピーをとる
-    var oldState = SplayTreeMap<TimeOfDay, bool>(
-      (a, b) {
-        return (a.hour * 60 + a.minute).compareTo(b.hour * 60 + b.minute);
-      }
-    )..addAll(state); 
+    // stateを更新
+    var oldState = _createSplayTreeMap()..addAll(state); 
     oldState[timeOfDay] = value;
     state = oldState;
 
     // セーブデータを更新
-    int minuteTime = timeOfDay.hour * 60 + timeOfDay.minute;
+    int minuteTime = TimeOfDayConverter.toMinutes(timeOfDay);
     prefs.setBool(minuteTime.toString(), value);
   }
 
@@ -94,21 +60,13 @@ class AlarmDatasNotifier extends _$AlarmDatasNotifier {
     // SharedPreferencesのインスタンス
     final prefs = await SharedPreferences.getInstance(); 
 
-    // コピーをとる
-    var oldState = SplayTreeMap<TimeOfDay, bool>(
-      (a, b) {
-        return (a.hour * 60 + a.minute).compareTo(b.hour * 60 + b.minute);
-      }
-    )..addAll(state); 
-
     // 新規データを追加
+    var oldState = _createSplayTreeMap()..addAll(state); 
     oldState[timeOfDay] = value;
-
-    // stateを上書き
     state = oldState;
 
     // SharedPreferencesに追加
-    int minuteTime = timeOfDay.hour * 60 + timeOfDay.minute;
+    int minuteTime = TimeOfDayConverter.toMinutes(timeOfDay);
     prefs.setBool(minuteTime.toString(), value);
   }
 
@@ -118,19 +76,13 @@ class AlarmDatasNotifier extends _$AlarmDatasNotifier {
     // SharedPreferencesのインスタンス
     final prefs = await SharedPreferences.getInstance(); 
 
-    // コピーをとる
-    var oldState = SplayTreeMap<TimeOfDay, bool>(
-      (a, b) {
-        return (a.hour * 60 + a.minute).compareTo(b.hour * 60 + b.minute);
-      }
-    )..addAll(state); 
-
-    // 変数から消す
+    // stateから消す
+    var oldState = _createSplayTreeMap()..addAll(state); 
     oldState.remove(timeOfDay);
     state = oldState;
 
     // SharedPreferencesから削除
-    int minuteTime = timeOfDay.hour * 60 + timeOfDay.minute;
+int minuteTime = TimeOfDayConverter.toMinutes(timeOfDay);
     prefs.remove(minuteTime.toString());
   }
 }

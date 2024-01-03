@@ -10,4 +10,8 @@ class TimeOfDayConverter {
     final int remainingMinutes = minutes % 60;
     return TimeOfDay(hour: hours, minute: remainingMinutes);
   }
+
+  static String toStringFromTimeOfDay(TimeOfDay time) {
+    return "${time.hour.toString().padLeft(2, '0')} : ${time.minute.toString().padLeft(2, '0')}";
+  }
 }

@@ -1,24 +1,17 @@
-import 'package:android_alarm_app/alarm_datas.dart';
-import 'package:android_alarm_app/edit_alarm_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'notification_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'notification_controller.dart';
+import 'alarm_datas.dart';
+import 'edit_alarm_screen.dart';
+import 'time_of_day_converter.dart';
 
 void main() async {
+  
   // 初期設定
   WidgetsFlutterBinding.ensureInitialized();
   AndroidAlarmManager.initialize(); //初期化
   NotificationController().initNotification();
-
-  // shared_preferencesに保存されているデータを全部読み込む
-  // final prefs = await SharedPreferences.getInstance();
-  // Set<String> keys = prefs.getKeys();
-  // for (String key in keys) {
-  //   int minuteTime = int.parse(key); 
-  //   TimeOfDay timeOfDay = TimeOfDay(hour: minuteTime ~/ 60, minute: minuteTime % 60);
-  //   alarmDatas[timeOfDay] = prefs.getBool(key) ?? false;
-  // }
 
   // 画面を表示
   MaterialApp app = MaterialApp(
@@ -65,28 +58,6 @@ class MainScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.restart_alt, size: 40),
             onPressed: () async {
-
-
-              // // セーブデータを読み取り
-              // final prefs = await SharedPreferences.getInstance();
-    
-              // // 返り値
-              // SplayTreeMap<TimeOfDay, bool> alarmDatas = SplayTreeMap<TimeOfDay, bool>(
-              //   (a, b) {
-              //     final aMinutes = a.hour * 60 + a.minute;
-              //     final bMinutes = b.hour * 60 + b.minute;
-              //     return aMinutes.compareTo(bMinutes);
-              //   }
-              // ); //Map<TimeOfDay, bool>();
-
-              // // セーブしていたデータを読み込み
-              // Set<String> keys = prefs.getKeys();
-              // for (String key in keys) {
-              //   int minuteTime = int.parse(key); 
-              //   TimeOfDay timeOfDay = TimeOfDay(hour: minuteTime ~/ 60, minute: minuteTime % 60);
-              //   alarmDatas[timeOfDay] = prefs.getBool(key) ?? false;
-              // }
-
               // AlarmDatasNotifireProviderにセーブデータを書き込み
               final notifier = ref.read(alarmDatasNotifierProvider.notifier);
               notifier.loadSaveData();
@@ -118,7 +89,7 @@ class MainScreen extends ConsumerWidget {
                       color: Colors.red,
                     ),
                     Text(
-                      '${entry.key.hour.toString().padLeft(2, '0')} : ${entry.key.minute.toString().padLeft(2, '0')}',
+                      TimeOfDayConverter.toStringFromTimeOfDay(entry.key),
                       style: const TextStyle(
                         fontSize: 44, // フォントサイズを調整
                       ),
