@@ -1,28 +1,21 @@
+import 'package:android_alarm_app/alarmDatas.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:shake/shake.dart';
-import 'dart:async';
-import 'notificationController.dart';
+// import 'notificationController.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  AndroidAlarmManager.initialize(); //初期化
-  NotificationController().initNotification();
-
-  final app = MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyApp(),
-  );
-  
-  runApp(app);
-}
+// import 'package:shared_preferences/shared_preferences.dart';
 
 DateTime scheduleTime = DateTime.now();
+// TimeOfDay? selectedTime;
+
+final selectedTimeProvider = StateProvider<TimeOfDay>(
+  (ref) {
+    return TimeOfDay(hour: 0, minute: 0);
+  }
+);
 
 Future<void> shakeAlarm() async {
   // アラームを鳴らす
@@ -44,11 +37,10 @@ Future<void> shakeAlarm() async {
   );
 }
 
-TimeOfDay? selectedTime = TimeOfDay.now();
+class EditAlarmScreen extends ConsumerWidget {
+  const EditAlarmScreen({super.key});
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  // selectedTime(TimeOfDay)⇒アラーム時刻(DateTime)に変換
   DateTime createNextDateTimeFromTime(TimeOfDay selectedTime) {
 
     // 現在の時刻と比較対象の時刻をDateTime型に変換
@@ -68,8 +60,11 @@ class MyApp extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-  return Scaffold(
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    final selectedTime = ref.watch(selectedTimeProvider);
+
+    return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Android_Alarm_App'),
@@ -81,6 +76,8 @@ class MyApp extends StatelessWidget {
           children: <Widget>[
             ElevatedButton(
               onPressed: () async{
+
+                // 時刻選択
                 final TimeOfDay? pickedTime = await showTimePicker(
                   context: context, 
                   initialTime: const TimeOfDay(hour: 0, minute: 0),                  
@@ -88,49 +85,50 @@ class MyApp extends StatelessWidget {
 
                 // 時刻を選択したかどうかで処理を分岐
                 if(pickedTime != null){
-                  print('selectedTime =  ${selectedTime}');
-                  selectedTime = pickedTime;
-                }
-                else{
-                  print('selectedTime = null');
+                  final notifier = ref.read(selectedTimeProvider.notifier);
+                  notifier.state = pickedTime;
                 }
               },
               child: const Text('Select Schedule Time'),
             ),
 
             ElevatedButton(
-              onPressed: (selectedTime == null) ? null :  () async{
+              onPressed: () async{
 
                 // スケジュール時刻
-                final DateTime selectedDateTime = createNextDateTimeFromTime(selectedTime!);
+                final DateTime selectedDateTime = createNextDateTimeFromTime(selectedTime);
 
                 // アラーム時刻を通知として表示
-                NotificationController().showNotification(selectedTime!.toString());
+                // NotificationController().showNotification(selectedTime!.toString());
+
+                // アラームを保存
+                final notifier = ref.read(alarmDatasNotifierProvider.notifier);
+                notifier.add(selectedTime, true);
 
                 // アラームをセット
                 await AndroidAlarmManager.oneShotAt(
-                  // DateTime.now().add(Duration(seconds: 2)),
                   selectedDateTime,
-                  0,
+                  selectedTime.hour * 60 + selectedTime.minute,
                   shakeAlarm,
-                  // exact: true,
-                  // allowWhileIdle: true,
                   alarmClock: true,
                   wakeup: true,
                   rescheduleOnReboot: true,
                 );
+
+                // MainScreenに戻る
+                Navigator.pop(context);
               },
-              child: const Text('Set Alarm'),
+              child: Text('Set Alarm at ${selectedTime.hour} : ${selectedTime.minute}'),
               
             ),
 
-            // アラームをキャンセル
-            ElevatedButton(
-              onPressed: () async{
-                await AndroidAlarmManager.cancel(0);
-              },
-              child: const Text('Cancel'),
-            ),
+            // // アラームをキャンセル
+            // ElevatedButton(
+            //   onPressed: () async{
+            //     await AndroidAlarmManager.cancel(0);
+            //   },
+            //   child: const Text('Cancel'),
+            // ),
           ],
         ),
       ),
