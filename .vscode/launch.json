@@ -6,7 +6,7 @@
     "configurations": [
         
         {
-            "program": "lib/mainScreen.dart",
+            "program": "lib/main_screen.dart",
             "name": "android_alarm_app",
             "request": "launch",
             "type": "dart"

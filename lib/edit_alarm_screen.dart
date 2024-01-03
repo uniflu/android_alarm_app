@@ -1,23 +1,22 @@
-import 'package:android_alarm_app/alarm_datas.dart';
 import 'package:flutter/material.dart';
+import 'package:android_alarm_app/alarm_datas.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:shake/shake.dart';
-// import 'notificationController.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// import 'package:shared_preferences/shared_preferences.dart';
+import 'time_of_day_converter.dart';
 
 DateTime scheduleTime = DateTime.now();
-// TimeOfDay? selectedTime;
 
 final selectedTimeProvider = StateProvider<TimeOfDay>(
   (ref) {
-    return TimeOfDay(hour: 0, minute: 0);
+    return const TimeOfDay(hour: 0, minute: 0);
   }
 );
 
+
 Future<void> shakeAlarm() async {
+
   // アラームを鳴らす
   FlutterRingtonePlayer.playAlarm();
 
@@ -108,7 +107,7 @@ class EditAlarmScreen extends ConsumerWidget {
                 // アラームをセット
                 await AndroidAlarmManager.oneShotAt(
                   selectedDateTime,
-                  selectedTime.hour * 60 + selectedTime.minute,
+                  TimeOfDayConverter.toMinutes(selectedTime),
                   shakeAlarm,
                   alarmClock: true,
                   wakeup: true,
@@ -118,17 +117,9 @@ class EditAlarmScreen extends ConsumerWidget {
                 // MainScreenに戻る
                 Navigator.pop(context);
               },
-              child: Text('Set Alarm at ${selectedTime.hour} : ${selectedTime.minute}'),
               
+              child: Text('Set Alarm at ${TimeOfDayConverter.toStringFromTimeOfDay(selectedTime)}'),
             ),
-
-            // // アラームをキャンセル
-            // ElevatedButton(
-            //   onPressed: () async{
-            //     await AndroidAlarmManager.cancel(0);
-            //   },
-            //   child: const Text('Cancel'),
-            // ),
           ],
         ),
       ),
