@@ -36,6 +36,9 @@ class AlarmDatasNotifier extends _$AlarmDatasNotifier {
       TimeOfDay timeOfDay = TimeOfDayConverter.toTimeOfDay(minuteTime);
       alarmDatas[timeOfDay] = prefs.getBool(key) ?? false;
     }
+
+    // stateを更新
+    state = alarmDatas;
   }
 
   // 上書き
@@ -82,7 +85,7 @@ class AlarmDatasNotifier extends _$AlarmDatasNotifier {
     state = oldState;
 
     // SharedPreferencesから削除
-int minuteTime = TimeOfDayConverter.toMinutes(timeOfDay);
+    int minuteTime = TimeOfDayConverter.toMinutes(timeOfDay);
     prefs.remove(minuteTime.toString());
   }
 }
