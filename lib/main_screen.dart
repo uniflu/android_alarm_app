@@ -1,8 +1,8 @@
-import 'package:android_alarm_app/alarmDatas.dart';
-import 'package:android_alarm_app/editAlarmScreen.dart';
+import 'package:android_alarm_app/alarm_datas.dart';
+import 'package:android_alarm_app/edit_alarm_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'notificationController.dart';
+import 'notification_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
