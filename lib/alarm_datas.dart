@@ -82,7 +82,7 @@ class AlarmDatasNotifier extends _$AlarmDatasNotifier {
     state = oldState;
 
     // SharedPreferencesから削除
-int minuteTime = TimeOfDayConverter.toMinutes(timeOfDay);
+    int minuteTime = TimeOfDayConverter.toMinutes(timeOfDay);
     prefs.remove(minuteTime.toString());
   }
 }
